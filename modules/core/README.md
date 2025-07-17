@@ -1,16 +1,42 @@
-# core
+# Core Module
 
-A new Flutter project.
+A shared Flutter module providing essential functionality and utilities for the six_amtech_task application.
 
-## Getting Started
+## Overview
 
-This project is a starting point for a Flutter application.
+The Core module serves as the foundation layer for the six_amtech_task project, containing shared utilities, services, and common functionality that can be reused across different parts of the application.
 
-A few resources to get you started if this is your first Flutter project:
+### Key Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **State Management**: Built with Riverpod for reactive state management
+- **Network Layer**: HTTP client implementation using Dio with custom interceptors
+- **Data Persistence**: Local storage capabilities using Hive database
+- **Logging System**: Structured logging with configurable levels
+- **Code Generation**: Support for JSON serialization and immutable data classes
+- **Type Safety**: Equatable integration for value equality comparisons
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Dependencies
+
+#### Core Dependencies
+- `flutter_riverpod` - State management solution
+- `dio` - HTTP client for API communications
+- `hive` & `hive_flutter` - NoSQL database for local storage
+- `logger` - Logging utility
+- `equatable` - Value equality for Dart classes
+
+#### Development Tools
+- `freezed` - Code generation for immutable classes
+- `json_serializable` - JSON serialization code generation
+- `build_runner` - Code generation runner
+- `riverpod_lint` - Linting rules for Riverpod
+- `flutter_gen_runner` - Asset generation
+
+## Usage
+
+This module is designed to be imported as a dependency in the main application. It provides the core infrastructure and utilities needed for building robust Flutter applications.
+
+```yaml
+dependencies:
+  core:
+    path: modules/core
+```
