@@ -43,22 +43,24 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     final bannerHeight = ResponsiveHelper.getHeight(
       context: context,
       mobile: 150.0,
-      tablet: 180.0,
-      desktop: 200.0,
+      tablet: 190.0,
+      desktop: 380.0,
     );
     
     final horizontalPadding = ResponsiveHelper.getPadding(
       context: context,
-      mobile: 16.0,
-      tablet: 20.0,
-      desktop: 24.0,
+      mobile: 20.0,
+      tablet: 28.0,
+      desktop: 36.0,
     );
     
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       child: Column(
         children: [
-          SizedBox(
+          Container(
+
+           // margin: EdgeInsets.only(right: 20),
             height: bannerHeight,
             child: _buildBannerContent(
               isLoading: isLoading,
@@ -116,9 +118,12 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
   }
 
   Widget _buildShimmerBanner(double bannerHeight) {
-    return ShimmerTemplate.banner(
-      height: bannerHeight,
-      borderRadius: BorderRadius.circular(16),
+    return Container(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: ShimmerTemplate.banner(
+        height: bannerHeight,
+        borderRadius: BorderRadius.circular(16),
+      ),
     );
   }
 
@@ -320,31 +325,11 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
       desktop: 28.0,
     );
     
-    final titleFontSize = ResponsiveHelper.getFontSize(
-      context: context,
-      mobile: 18.0,
-      tablet: 20.0,
-      desktop: 22.0,
-    );
-    
-    final typeFontSize = ResponsiveHelper.getFontSize(
-      context: context,
-      mobile: 12.0,
-      tablet: 14.0,
-      desktop: 16.0,
-    );
-    
     return Container(
+       padding: EdgeInsets.only(left:10,right: 10),
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -354,7 +339,9 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
             Positioned.fill(
               child: CachedNetworkImage(
                 imageUrl: banner.image,
-                fit: BoxFit.cover,
+                fit: ResponsiveHelper.isDesktop(context) ? BoxFit.cover : BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
                 placeholder: (context, url) => ShimmerTemplate.banner(
                   height: double.infinity,
                   borderRadius: BorderRadius.zero,
