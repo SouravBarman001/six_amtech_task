@@ -1,5 +1,6 @@
 library core;
 export 'src/base/base_state.dart';
+export 'src/constants/api_constants.dart';
 export 'src/helpers/helpers.dart';
 export 'src/log/log.dart';
 export 'src/service/cache/cache_service.dart';

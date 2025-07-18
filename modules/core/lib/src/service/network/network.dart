@@ -7,6 +7,8 @@ import 'src/rest_client.dart';
 export 'package:dio/dio.dart';
 
 export 'api.dart';
+export 'stackfood_api_service.dart';
+export 'stackfood_api_provider.dart';
 
 final networkProvider = Provider<RestClient>(
   (ref) {

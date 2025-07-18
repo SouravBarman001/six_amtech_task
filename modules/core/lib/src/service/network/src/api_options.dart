@@ -12,7 +12,10 @@ class PublicApiOptions extends ApiOptions {
   PublicApiOptions() {
     super.options.headers = <String, dynamic>{
       'Accept': 'application/json',
-      'Content-type': 'application/json',
+      'Content-Type': 'application/json; charset=UTF-8',
+      'zoneId': '[1]',
+      'latitude': '23.735129',
+      'longitude': '90.425614',
     };
   }
 }
@@ -21,8 +24,11 @@ class ProtectedApiOptions extends ApiOptions {
   ProtectedApiOptions(String apiToken) {
     super.options.headers = <String, dynamic>{
       'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer $apiToken',
+      'zoneId': '[1]',
+      'latitude': '23.735129',
+      'longitude': '90.425614',
     };
   }
 }
