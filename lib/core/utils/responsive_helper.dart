@@ -137,4 +137,35 @@ class ResponsiveHelper {
       desktop: desktop,
     );
   }
+  
+  // Grid cross axis count
+  static int getCrossAxisCount({
+    required BuildContext context,
+    required int mobile,
+    required int tablet,
+    required int desktop,
+  }) {
+    if (isMobile(context)) {
+      return mobile;
+    } else if (isTablet(context)) {
+      return tablet;
+    } else {
+      return desktop;
+    }
+  }
+  
+  // Aspect ratio
+  static double getAspectRatio({
+    required BuildContext context,
+    required double mobile,
+    required double tablet,
+    required double desktop,
+  }) {
+    return getResponsiveValue(
+      context: context,
+      mobile: mobile,
+      tablet: tablet,
+      desktop: desktop,
+    );
+  }
 }

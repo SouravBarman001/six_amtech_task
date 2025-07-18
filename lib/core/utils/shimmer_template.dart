@@ -49,28 +49,34 @@ class ShimmerTemplate extends StatelessWidget {
       key: key,
       enabled: enabled,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             height: size,
             width: size,
+            padding: const EdgeInsets.all(8.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
             ),
           ),
-          const SizedBox(height: 8.0),
-          Container(
-            height: 12.0,
-            width: size * 0.8,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-          ),
-          const SizedBox(height: 4.0),
+          const SizedBox(height: 6.0),
           Container(
             height: 10.0,
-            width: size * 0.6,
+            width: size * 0.8,
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(5.0),

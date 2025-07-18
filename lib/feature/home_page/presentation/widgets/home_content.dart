@@ -32,7 +32,7 @@ class HomeContent extends StatelessWidget {
                           const SearchBarWidget(),
                           SizedBox(height: 20.h),
                           const PromotionalBanner(),
-                          SizedBox(height: 24.h),
+                          SizedBox(height: 10.h),
                           const CategoriesSection(),
                           SizedBox(height: 24.h),
                           const PopularFoodSection(),
