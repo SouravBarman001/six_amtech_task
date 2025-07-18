@@ -89,7 +89,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
             // TODO: Navigate to all categories page
           },
           child: Text(
-            'See All',
+            'View All',
             style: TextStyle(
               fontSize: ResponsiveHelper.getFontSize(
                 context: context,

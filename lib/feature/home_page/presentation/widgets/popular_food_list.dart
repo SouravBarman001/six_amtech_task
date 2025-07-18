@@ -76,7 +76,7 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          'Popular Food',
+          'Popular Food Nearby',
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,

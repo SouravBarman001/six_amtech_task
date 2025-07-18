@@ -2,3 +2,4 @@
 export 'promotional_banner.dart';
 export 'category_list.dart';
 export 'popular_food_list.dart';
+export 'food_campaign_list.dart';
