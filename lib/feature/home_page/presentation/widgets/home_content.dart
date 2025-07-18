@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:six_amtech_task/feature/home_page/presentation/widgets/promotional_banner.dart';
 import 'home_app_bar.dart';
 import 'search_bar_widget.dart';
-import 'promotional_banner.dart';
 import 'categories_section.dart';
 import 'popular_food_section.dart';
 import 'food_campaign_section.dart';
@@ -14,7 +14,8 @@ class HomeContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      // backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Colors.white,
       body: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 600.w),
