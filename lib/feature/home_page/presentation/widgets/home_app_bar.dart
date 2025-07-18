@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:badges/badges.dart' as badges;
 import '../../../../core/utils/responsive_helper.dart';
+import '../providers/location_providers.dart';
 
-class HomeAppBar extends StatelessWidget {
+class HomeAppBar extends ConsumerStatefulWidget {
   const HomeAppBar({super.key});
+
+  @override
+  ConsumerState<HomeAppBar> createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends ConsumerState<HomeAppBar> {
+  @override
+  void initState() {
+    super.initState();
+    // Load location when widget initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(locationNotifierProvider.notifier).getCurrentLocation();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +85,11 @@ class HomeAppBar extends StatelessWidget {
       tablet: 10.0,
       desktop: 12.0,
     );
+
+    // Watch location state
+    final isLoading = ref.watch(isLocationLoadingProvider);
+    final locationError = ref.watch(locationErrorProvider);
+    final currentAddress = ref.watch(currentLocationAddressProvider);
     
     return Container(
       padding: EdgeInsets.only(
@@ -87,12 +108,70 @@ class HomeAppBar extends StatelessWidget {
           ),
           SizedBox(width: spacingWidth),
           Expanded(
-            child: Text(
-              '76A eighth avenue, New York, US',
-              style: TextStyle(
-                fontSize: fontSize,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w400,
+            child: GestureDetector(
+              onTap: () {
+                // Refresh location on tap
+                ref.read(locationNotifierProvider.notifier).refreshLocation();
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isLoading)
+                    Row(
+                      children: [
+                        SizedBox(
+                          width: 12,
+                          height: 12,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Getting location...',
+                          style: TextStyle(
+                            fontSize: fontSize * 0.9,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    )
+                  else if (locationError != null)
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 16,
+                          color: Colors.red[400],
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            'Tap to retry location',
+                            style: TextStyle(
+                              fontSize: fontSize * 0.9,
+                              color: Colors.red[400],
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      currentAddress ?? '76A eighth avenue, New York, US',
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w400,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                ],
               ),
             ),
           ),
@@ -118,7 +197,7 @@ class HomeAppBar extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(iconPadding),
               child: Icon(
-                Icons.notifications_none,
+                Icons.notifications,
                 color: Colors.black,
                 size: iconSize,
               ),

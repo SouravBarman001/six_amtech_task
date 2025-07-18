@@ -7,6 +7,7 @@ export 'src/service/cache/cache_service.dart';
 export 'src/service/network/error_model.dart';
 export 'src/service/network/network.dart';
 export 'src/service/network/request_handler.dart';
+export 'src/service/network/src/failures.dart';
 export 'src/service/network/src/pretty_dio_logger.dart';
 export 'src/service/network/src/rest_client.dart';
 
