@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:six_amtech_task/feature/home_page/presentation/widgets/popular_food_list.dart';
 import 'package:six_amtech_task/feature/home_page/presentation/widgets/promotional_banner.dart';
 import 'home_app_bar.dart';
 import 'search_bar_widget.dart';
@@ -35,7 +36,7 @@ class HomeContent extends StatelessWidget {
                           SizedBox(height: 10.h),
                           const CategoriesSection(),
                           SizedBox(height: 24.h),
-                          const PopularFoodSection(),
+                          const PopularFoodList(),
                           SizedBox(height: 24.h),
                           const FoodCampaignSection(),
                           SizedBox(height: 24.h),
