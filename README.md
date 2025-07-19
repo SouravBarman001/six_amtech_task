@@ -27,7 +27,6 @@ A delicious food delivery app built with Flutter, showcasing modern architecture
 - **UI Components**: Clean header design and food item displays
 - **Error Handling**: Comprehensive error handling with logging
 - **Performance Optimized**: Efficient rendering and smooth animations
-- **Platform-Specific Features**: Image zoom in full Web view and mobile haptic feedback
 
 ## 🚀 Setup Criteria
 
