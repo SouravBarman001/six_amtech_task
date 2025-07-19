@@ -15,7 +15,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const HomeContent(),
+      body: HomeContent(
+        selectedIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+      ),
       bottomNavigationBar: BottomNavBar(
         selectedIndex: _selectedIndex,
         onTap: (index) {

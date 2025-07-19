@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/utils/responsive_helper.dart';
 
 class BottomNavBar extends StatelessWidget {
@@ -13,6 +14,11 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hide bottom nav on desktop
+    if (ResponsiveHelper.isDesktop(context)) {
+      return const SizedBox.shrink();
+    }
+    
     final navBarHeight = ResponsiveHelper.getHeight(
       context: context,
       mobile: 60.0,
@@ -22,23 +28,23 @@ class BottomNavBar extends StatelessWidget {
     
     final cartButtonSize = ResponsiveHelper.getWidth(
       context: context,
-      mobile: 60.0,
-      tablet: 70.0,
-      desktop: 80.0,
+      mobile: 80.0,
+      tablet: 90.0,
+      desktop: 100.0,
     );
     
     final cartIconSize = ResponsiveHelper.getIconSize(
       context: context,
-      mobile: 24.0,
-      tablet: 28.0,
-      desktop: 32.0,
+      mobile: 28.0,
+      tablet: 35.0,
+      desktop: 36.0,
     );
     
     final navIconSize = ResponsiveHelper.getIconSize(
       context: context,
-      mobile: 24.0,
-      tablet: 26.0,
-      desktop: 28.0,
+      mobile: 28.0,
+      tablet: 30.0,
+      desktop: 32.0,
     );
     
     return Container(
@@ -96,13 +102,16 @@ class BottomNavBar extends StatelessWidget {
             top: -(cartButtonSize * 0.4),
             left: MediaQuery.of(context).size.width / 2 - (cartButtonSize / 2),
             child: GestureDetector(
-              onTap: () => onTap(4),
+              onTap: () {
+                HapticFeedback.mediumImpact();
+                onTap(4);
+              },
               child: Container(
                 height: cartButtonSize,
                 width: cartButtonSize,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.green,
+                  color: const Color(0xFF049D55),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black26,
@@ -131,11 +140,14 @@ class BottomNavBar extends StatelessWidget {
     required double iconSize,
   }) {
     return GestureDetector(
-      onTap: () => onTap(index),
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap(index);
+      },
       child: Icon(
         icon,
         size: iconSize,
-        color: isActive ? Colors.green : Colors.blueGrey,
+        color: isActive ? const Color(0xFF049D55) : Colors.blueGrey,
       ),
     );
   }

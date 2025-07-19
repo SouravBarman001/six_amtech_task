@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/utils/responsive_helper.dart';
 
 class SearchBarWidget extends StatefulWidget {
@@ -127,6 +128,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             ),
             GestureDetector(
               onTap: () {
+                HapticFeedback.mediumImpact();
                 _searchController.clear();
                 _focusNode.unfocus();
                 setState(() {});

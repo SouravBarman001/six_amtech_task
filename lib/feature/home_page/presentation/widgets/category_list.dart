@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/responsive_helper.dart';
@@ -14,6 +15,8 @@ class CategoryList extends ConsumerStatefulWidget {
 }
 
 class _CategoryListState extends ConsumerState<CategoryList> {
+  final Map<int, bool> _hoveredCategories = {};
+  
   @override
   void initState() {
     super.initState();
@@ -81,11 +84,12 @@ class _CategoryListState extends ConsumerState<CategoryList> {
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: const Color(0xFF000743),
           ),
         ),
         TextButton(
           onPressed: () {
+            HapticFeedback.mediumImpact();
             // TODO: Navigate to all categories page
           },
           child: Text(
@@ -224,6 +228,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
             )),
             ElevatedButton(
               onPressed: () {
+                HapticFeedback.mediumImpact();
                 ref.read(categoryNotifierProvider.notifier).retry();
               },
               style: ElevatedButton.styleFrom(
@@ -382,6 +387,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         // TODO: Navigate to category products page
         print('Tapped on category: ${category.name}');
       },
@@ -392,52 +398,9 @@ class _CategoryListState extends ConsumerState<CategoryList> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // Category Image Container with white background and shadow
-            Container(
-              width: imageSize,
-              height: imageSize,
-              padding: containerPadding,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(borderRadius),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius),
-                child: CachedNetworkImage(
-                  imageUrl: category.image,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey.shade100,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey.shade100,
-                    child: Icon(
-                      Icons.restaurant,
-                      color: Colors.grey.shade400,
-                      size: ResponsiveHelper.getIconSize(
-                        context: context,
-                        mobile: 16.0,
-                        tablet: 18.0,
-                        desktop: 20.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            ResponsiveHelper.isDesktop(context)
+                ? _buildDesktopHoverCategoryImage(category, imageSize, borderRadius, containerPadding)
+                : _buildStandardCategoryImage(category, imageSize, borderRadius, containerPadding),
             
             SizedBox(height: ResponsiveHelper.getHeight(
               context: context,
@@ -452,13 +415,88 @@ class _CategoryListState extends ConsumerState<CategoryList> {
               style: TextStyle(
                 fontSize: nameFontSize,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey[700],
+                color: const Color(0xFF000743),
               ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopHoverCategoryImage(
+    domain.Category category, 
+    double imageSize, 
+    double borderRadius, 
+    EdgeInsets containerPadding
+  ) {
+    final isHovered = _hoveredCategories[category.id] ?? false;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredCategories[category.id] = true),
+      onExit: (_) => setState(() => _hoveredCategories[category.id] = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: isHovered ? 1.1 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: _buildStandardCategoryImage(category, imageSize, borderRadius, containerPadding),
+      ),
+    );
+  }
+
+  Widget _buildStandardCategoryImage(
+    domain.Category category, 
+    double imageSize, 
+    double borderRadius, 
+    EdgeInsets containerPadding
+  ) {
+    return Container(
+      width: imageSize,
+      height: imageSize,
+      padding: containerPadding,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: CachedNetworkImage(
+          imageUrl: category.image,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: Colors.grey.shade100,
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+                strokeCap: StrokeCap.round,
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: Colors.grey.shade100,
+            child: Icon(
+              Icons.restaurant,
+              color: Colors.grey.shade400,
+              size: ResponsiveHelper.getIconSize(
+                context: context,
+                mobile: 16.0,
+                tablet: 18.0,
+                desktop: 20.0,
+              ),
+            ),
+          ),
         ),
       ),
     );

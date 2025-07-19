@@ -10,7 +10,14 @@ import 'food_campaign_section.dart';
 import 'restaurants_section.dart';
 
 class HomeContent extends StatelessWidget {
-  const HomeContent({super.key});
+  final int selectedIndex;
+  final Function(int) onTap;
+  
+  const HomeContent({
+    super.key,
+    required this.selectedIndex,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +51,10 @@ class HomeContent extends StatelessWidget {
                       SliverToBoxAdapter(
                         child: Column(
                           children: [
-                            const HomeAppBar(),
+                            HomeAppBar(
+                              selectedIndex: selectedIndex,
+                              onTap: onTap,
+                            ),
                             SizedBox(height: ResponsiveHelper.getHeight(
                               context: context,
                               mobile: 8.0,

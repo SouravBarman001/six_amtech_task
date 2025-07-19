@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:badges/badges.dart' as badges;
 import '../../../../core/utils/responsive_helper.dart';
 import '../providers/location_providers.dart';
 
 class HomeAppBar extends ConsumerStatefulWidget {
-  const HomeAppBar({super.key});
+  final int selectedIndex;
+  final Function(int) onTap;
+  
+  const HomeAppBar({
+    super.key,
+    this.selectedIndex = 0,
+    required this.onTap,
+  });
 
   @override
   ConsumerState<HomeAppBar> createState() => _HomeAppBarState();
@@ -110,6 +118,7 @@ class _HomeAppBarState extends ConsumerState<HomeAppBar> {
           Expanded(
             child: GestureDetector(
               onTap: () {
+                HapticFeedback.mediumImpact();
                 // Refresh location on tap
                 ref.read(locationNotifierProvider.notifier).refreshLocation();
               },
@@ -175,6 +184,23 @@ class _HomeAppBarState extends ConsumerState<HomeAppBar> {
               ),
             ),
           ),
+          // Desktop Navigation Icons
+          if (ResponsiveHelper.isDesktop(context)) ...[
+            _buildDesktopNavItem(
+              icon: Icons.favorite_border,
+              index: 1,
+              isActive: widget.selectedIndex == 1,
+              iconSize: iconSize,
+            ),
+            SizedBox(width: spacingWidth),
+            _buildDesktopNavItem(
+              icon: Icons.shopping_cart,
+              index: 4,
+              isActive: widget.selectedIndex == 4,
+              iconSize: iconSize,
+            ),
+            SizedBox(width: spacingWidth),
+          ],
           badges.Badge(
             badgeContent: Text(
               '',
@@ -204,6 +230,37 @@ class _HomeAppBarState extends ConsumerState<HomeAppBar> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopNavItem({
+    required IconData icon,
+    required int index,
+    required bool isActive,
+    required double iconSize,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        widget.onTap(index);
+      },
+      child: Container(
+        padding: EdgeInsets.all(ResponsiveHelper.getPadding(
+          context: context,
+          mobile: 8.0,
+          tablet: 10.0,
+          desktop: 12.0,
+        )),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF049D55).withOpacity(0.1) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: iconSize,
+          color: isActive ? const Color(0xFF049D55) : Colors.grey[600],
+        ),
       ),
     );
   }

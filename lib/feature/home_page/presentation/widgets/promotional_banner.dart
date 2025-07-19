@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/responsive_helper.dart';
@@ -16,6 +17,7 @@ class PromotionalBanner extends ConsumerStatefulWidget {
 class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  final Map<String, bool> _hoveredImages = {};
 
   @override
   void initState() {
@@ -192,6 +194,7 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
             )),
             ElevatedButton(
               onPressed: () {
+                HapticFeedback.mediumImpact();
                 ref.read(bannerNotifierProvider.notifier).retry();
               },
               style: ElevatedButton.styleFrom(
@@ -356,23 +359,23 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
         
     final dotMargin = ResponsiveHelper.getMargin(
       context: context,
-      mobile: 4.0,
-      tablet: 5.0,
-      desktop: 6.0,
+      mobile: 2.5,
+      tablet: 3.0,
+      desktop: 2.5,
     );
     
     final activeDotSize = ResponsiveHelper.getWidth(
       context: context,
-      mobile: 10.0,
-      tablet: 12.0,
-      desktop: 14.0,
+      mobile: 6.0,
+      tablet: 8.0,
+      desktop: 6.0,
     );
     
     final inactiveDotSize = ResponsiveHelper.getWidth(
       context: context,
-      mobile: 6.0,
-      tablet: 8.0,
-      desktop: 10.0,
+      mobile: 4.0,
+      tablet: 5.0,
+      desktop: 4.0,
     );
     
     return Row(
@@ -425,61 +428,9 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
           children: [
             // Background image from API
             Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: banner.image,
-                fit: ResponsiveHelper.isDesktop(context) ? BoxFit.cover : BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                alignment: Alignment.center,
-                placeholder: (context, url) => ShimmerTemplate.banner(
-                  height: double.infinity,
-                  borderRadius: BorderRadius.zero,
-                ),
-                errorWidget: (context, url, error) => Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFFF6B35), Color(0xFFFF8A50)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image_not_supported,
-                          color: Colors.white.withOpacity(0.7),
-                          size: ResponsiveHelper.getIconSize(
-                            context: context,
-                            mobile: 40.0,
-                            tablet: 45.0,
-                            desktop: 50.0,
-                          ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.getHeight(
-                          context: context,
-                          mobile: 8.0,
-                          tablet: 10.0,
-                          desktop: 12.0,
-                        )),
-                        Text(
-                          'Image not available',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: ResponsiveHelper.getFontSize(
-                              context: context,
-                              mobile: 12.0,
-                              tablet: 14.0,
-                              desktop: 16.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              child: ResponsiveHelper.isDesktop(context)
+                  ? _buildDesktopHoverImage(banner)
+                  : _buildStandardImage(banner),
             ),
             // Content from API data
             Positioned(
@@ -522,6 +473,80 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopHoverImage(domain.Banner banner) {
+    final isHovered = _hoveredImages[banner.image] ?? false;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredImages[banner.image] = true),
+      onExit: (_) => setState(() => _hoveredImages[banner.image] = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: isHovered ? 1.1 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: _buildStandardImage(banner),
+      ),
+    );
+  }
+
+  Widget _buildStandardImage(domain.Banner banner) {
+    return CachedNetworkImage(
+      imageUrl: banner.image,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center,
+      placeholder: (context, url) => ShimmerTemplate.banner(
+        height: double.infinity,
+        borderRadius: BorderRadius.zero,
+      ),
+      errorWidget: (context, url, error) => Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFF6B35), Color(0xFFFF8A50)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.image_not_supported,
+                color: Colors.white.withOpacity(0.7),
+                size: ResponsiveHelper.getIconSize(
+                  context: context,
+                  mobile: 40.0,
+                  tablet: 45.0,
+                  desktop: 50.0,
+                ),
+              ),
+              SizedBox(height: ResponsiveHelper.getHeight(
+                context: context,
+                mobile: 8.0,
+                tablet: 10.0,
+                desktop: 12.0,
+              )),
+              Text(
+                'Image not available',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: ResponsiveHelper.getFontSize(
+                    context: context,
+                    mobile: 12.0,
+                    tablet: 14.0,
+                    desktop: 16.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
