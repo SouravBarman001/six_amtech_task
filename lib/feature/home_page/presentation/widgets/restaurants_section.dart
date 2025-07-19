@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -76,7 +77,7 @@ class _RestaurantsSectionState extends ConsumerState<RestaurantsSection> {
                     desktop: 22.0,
                   ),
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: const Color(0xFF000743),
                 ),
               ),
               Container(
@@ -801,6 +802,7 @@ class _RestaurantsSectionState extends ConsumerState<RestaurantsSection> {
           ),
           ElevatedButton(
             onPressed: () {
+              HapticFeedback.mediumImpact();
               ref.read(restaurantNotifierProvider.notifier).refreshRestaurants();
             },
             style: ElevatedButton.styleFrom(

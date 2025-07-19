@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -81,11 +82,12 @@ class _FoodCampaignListState extends ConsumerState<FoodCampaignList> {
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: const Color(0xFF000743),
           ),
         ),
         TextButton(
           onPressed: () {
+            HapticFeedback.mediumImpact();
             // TODO: Navigate to all campaigns page
           },
           child: Text(
@@ -225,6 +227,7 @@ class _FoodCampaignListState extends ConsumerState<FoodCampaignList> {
             )),
             ElevatedButton(
               onPressed: () {
+                HapticFeedback.mediumImpact();
                 ref.read(campaignNotifierProvider.notifier).retry();
               },
               style: ElevatedButton.styleFrom(
@@ -367,6 +370,7 @@ class _FoodCampaignListState extends ConsumerState<FoodCampaignList> {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         // TODO: Navigate to campaign details page
         print('Tapped on campaign: ${campaign.name}');
       },

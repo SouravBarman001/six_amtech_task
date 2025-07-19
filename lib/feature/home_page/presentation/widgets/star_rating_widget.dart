@@ -13,7 +13,7 @@ class StarRatingWidget extends StatelessWidget {
     super.key,
     required this.rating,
     this.size = 16.0,
-    this.filledColor = const Color(0xFFFF6B35),
+    this.filledColor = const Color(0xFF049D55),
     this.emptyColor = const Color(0xFFE0E0E0),
     this.showHalfStars = true,
   });
@@ -72,7 +72,7 @@ class ResponsiveStarRating extends StatelessWidget {
   const ResponsiveStarRating({
     super.key,
     required this.rating,
-    this.filledColor = const Color(0xFFFF6B35),
+    this.filledColor = const Color(0xFF049D55),
     this.emptyColor = const Color(0xFFE0E0E0),
     this.showHalfStars = true,
   });

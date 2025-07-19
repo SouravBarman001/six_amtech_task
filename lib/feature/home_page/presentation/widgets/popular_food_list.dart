@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/responsive_helper.dart';
@@ -14,6 +15,8 @@ class PopularFoodList extends ConsumerStatefulWidget {
 }
 
 class _PopularFoodListState extends ConsumerState<PopularFoodList> {
+  final Map<String, bool> _hoveredFoodItems = {};
+  
   @override
   void initState() {
     super.initState();
@@ -80,11 +83,12 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
           style: TextStyle(
             fontSize: titleFontSize,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: const Color(0xFF000743),
           ),
         ),
         TextButton(
           onPressed: () {
+            HapticFeedback.mediumImpact();
             // TODO: Navigate to all popular food page
           },
           child: Text(
@@ -227,6 +231,7 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
             )),
             ElevatedButton(
               onPressed: () {
+                HapticFeedback.mediumImpact();
                 ref.read(productNotifierProvider.notifier).retry();
               },
               style: ElevatedButton.styleFrom(
@@ -376,6 +381,7 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
 
     return GestureDetector(
       onTap: () {
+        HapticFeedback.mediumImpact();
         // TODO: Navigate to product details page
         print('Tapped on product: ${product.name}');
       },
@@ -401,42 +407,9 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image
-            ClipRRect(
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(borderRadius),
-                topRight: Radius.circular(borderRadius),
-              ),
-              child: Container(
-                height: imageHeight,
-                width: double.infinity,
-                child: CachedNetworkImage(
-                  imageUrl: product.imageFullUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Container(
-                    color: Colors.grey.shade100,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: const Color(0xFFFF6B35),
-                        strokeWidth: 2,
-                      ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey.shade100,
-                    child: Icon(
-                      Icons.fastfood,
-                      color: Colors.grey.shade400,
-                      size: ResponsiveHelper.getIconSize(
-                        context: context,
-                        mobile: 24.0,
-                        tablet: 26.0,
-                        desktop: 28.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            ResponsiveHelper.isDesktop(context)
+                ? _buildDesktopHoverProductImage(product, borderRadius, imageHeight)
+                : _buildStandardProductImage(product, borderRadius, imageHeight),
             
             // Product Details
             Expanded(
@@ -559,6 +532,75 @@ class _PopularFoodListState extends ConsumerState<PopularFoodList> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopHoverProductImage(
+    domain.Product product, 
+    double borderRadius, 
+    double imageHeight
+  ) {
+    final isHovered = _hoveredFoodItems[product.imageFullUrl] ?? false;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredFoodItems[product.imageFullUrl] = true),
+      onExit: (_) => setState(() => _hoveredFoodItems[product.imageFullUrl] = false),
+      cursor: SystemMouseCursors.click,
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(borderRadius),
+          topRight: Radius.circular(borderRadius),
+        ),
+        child: AnimatedScale(
+          scale: isHovered ? 1.1 : 1.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _buildStandardProductImage(product, borderRadius, imageHeight),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStandardProductImage(
+    domain.Product product, 
+    double borderRadius, 
+    double imageHeight
+  ) {
+    return ClipRRect(
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(borderRadius),
+        topRight: Radius.circular(borderRadius),
+      ),
+      child: Container(
+        height: imageHeight,
+        width: double.infinity,
+        child: CachedNetworkImage(
+          imageUrl: product.imageFullUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: Colors.grey.shade100,
+            child: Center(
+              child: CircularProgressIndicator(
+                color: const Color(0xFFFF6B35),
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+          errorWidget: (context, url, error) => Container(
+            color: Colors.grey.shade100,
+            child: Icon(
+              Icons.fastfood,
+              color: Colors.grey.shade400,
+              size: ResponsiveHelper.getIconSize(
+                context: context,
+                mobile: 24.0,
+                tablet: 26.0,
+                desktop: 28.0,
+              ),
+            ),
+          ),
         ),
       ),
     );

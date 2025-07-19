@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/utils/responsive_helper.dart';
@@ -16,6 +17,7 @@ class PromotionalBanner extends ConsumerStatefulWidget {
 class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
+  final Map<String, bool> _hoveredImages = {};
 
   @override
   void initState() {
@@ -44,14 +46,14 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
       context: context,
       mobile: 150.0,
       tablet: 190.0,
-      desktop: 380.0,
+      desktop: 200.0,
     );
     
     final horizontalPadding = ResponsiveHelper.getPadding(
       context: context,
       mobile: 20.0,
       tablet: 28.0,
-      desktop: 36.0,
+      desktop: 24.0,
     );
     
     return Padding(
@@ -103,7 +105,11 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
 
     return PageView.builder(
       controller: _pageController,
-      itemCount: banners.length,
+      itemCount: ResponsiveHelper.isDesktop(context) 
+          ? (banners.length / 3).ceil() 
+          : ResponsiveHelper.isTablet(context)
+              ? (banners.length / 2).ceil()
+              : banners.length,
       onPageChanged: (index) {
         setState(() {
           _currentPage = index;
@@ -112,7 +118,16 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
         ref.read(bannerNotifierProvider.notifier).updateCurrentIndex(index);
       },
       itemBuilder: (context, index) {
-        return _buildBannerItem(banners[index]);
+        if (ResponsiveHelper.isDesktop(context)) {
+          // Desktop: Show 3 banners per page
+          return _buildDesktopBannerPage(banners, index);
+        } else if (ResponsiveHelper.isTablet(context)) {
+          // Tablet: Show 2 banners per page
+          return _buildTabletBannerPage(banners, index);
+        } else {
+          // Mobile: Show 1 banner per page
+          return _buildBannerItem(banners[index]);
+        }
       },
     );
   }
@@ -179,6 +194,7 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
             )),
             ElevatedButton(
               onPressed: () {
+                HapticFeedback.mediumImpact();
                 ref.read(bannerNotifierProvider.notifier).retry();
               },
               style: ElevatedButton.styleFrom(
@@ -267,31 +283,104 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     );
   }
 
+  Widget _buildDesktopBannerPage(List<domain.Banner> banners, int pageIndex) {
+    final startIndex = pageIndex * 3;
+    final endIndex = (startIndex + 3).clamp(0, banners.length);
+    final pageBanners = banners.sublist(startIndex, endIndex);
+    
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.getPadding(
+          context: context,
+          mobile: 0.0,
+          tablet: 0.0,
+          desktop: 8.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < pageBanners.length; i++) ...[
+            Expanded(
+              child: _buildBannerItem(pageBanners[i]),
+            ),
+            if (i < pageBanners.length - 1)
+              SizedBox(width: ResponsiveHelper.getWidth(
+                context: context,
+                mobile: 0.0,
+                tablet: 0.0,
+                desktop: 12.0,
+              )),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletBannerPage(List<domain.Banner> banners, int pageIndex) {
+    final startIndex = pageIndex * 2;
+    final endIndex = (startIndex + 2).clamp(0, banners.length);
+    final pageBanners = banners.sublist(startIndex, endIndex);
+    
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.getPadding(
+          context: context,
+          mobile: 0.0,
+          tablet: 6.0,
+          desktop: 0.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < pageBanners.length; i++) ...[
+            Expanded(
+              child: _buildBannerItem(pageBanners[i]),
+            ),
+            if (i < pageBanners.length - 1)
+              SizedBox(width: ResponsiveHelper.getWidth(
+                context: context,
+                mobile: 0.0,
+                tablet: 12.0,
+                desktop: 0.0,
+              )),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildDotIndicator(int itemCount) {
+    // Calculate total pages based on screen type
+    final totalPages = ResponsiveHelper.isDesktop(context) 
+        ? (itemCount / 3).ceil() 
+        : ResponsiveHelper.isTablet(context)
+            ? (itemCount / 2).ceil()
+            : itemCount;
+        
     final dotMargin = ResponsiveHelper.getMargin(
       context: context,
-      mobile: 4.0,
-      tablet: 5.0,
-      desktop: 6.0,
+      mobile: 2.5,
+      tablet: 3.0,
+      desktop: 2.5,
     );
     
     final activeDotSize = ResponsiveHelper.getWidth(
       context: context,
-      mobile: 10.0,
-      tablet: 12.0,
-      desktop: 14.0,
+      mobile: 6.0,
+      tablet: 8.0,
+      desktop: 6.0,
     );
     
     final inactiveDotSize = ResponsiveHelper.getWidth(
       context: context,
-      mobile: 6.0,
-      tablet: 8.0,
-      desktop: 10.0,
+      mobile: 4.0,
+      tablet: 5.0,
+      desktop: 4.0,
     );
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(itemCount, (index) {
+      children: List.generate(totalPages, (index) {
         bool isActive = _currentPage == index;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
@@ -326,7 +415,9 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     );
     
     return Container(
-       padding: EdgeInsets.only(left:10,right: 10),
+      padding: ResponsiveHelper.isDesktop(context) 
+          ? EdgeInsets.zero 
+          : EdgeInsets.only(left: 10, right: 10),
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -337,60 +428,9 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
           children: [
             // Background image from API
             Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: banner.image,
-                fit: ResponsiveHelper.isDesktop(context) ? BoxFit.cover : BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-                placeholder: (context, url) => ShimmerTemplate.banner(
-                  height: double.infinity,
-                  borderRadius: BorderRadius.zero,
-                ),
-                errorWidget: (context, url, error) => Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFFF6B35), Color(0xFFFF8A50)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.image_not_supported,
-                          color: Colors.white.withOpacity(0.7),
-                          size: ResponsiveHelper.getIconSize(
-                            context: context,
-                            mobile: 40.0,
-                            tablet: 45.0,
-                            desktop: 50.0,
-                          ),
-                        ),
-                        SizedBox(height: ResponsiveHelper.getHeight(
-                          context: context,
-                          mobile: 8.0,
-                          tablet: 10.0,
-                          desktop: 12.0,
-                        )),
-                        Text(
-                          'Image not available',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: ResponsiveHelper.getFontSize(
-                              context: context,
-                              mobile: 12.0,
-                              tablet: 14.0,
-                              desktop: 16.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              child: ResponsiveHelper.isDesktop(context)
+                  ? _buildDesktopHoverImage(banner)
+                  : _buildStandardImage(banner),
             ),
             // Content from API data
             Positioned(
@@ -433,6 +473,80 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDesktopHoverImage(domain.Banner banner) {
+    final isHovered = _hoveredImages[banner.image] ?? false;
+    
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hoveredImages[banner.image] = true),
+      onExit: (_) => setState(() => _hoveredImages[banner.image] = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedScale(
+        scale: isHovered ? 1.1 : 1.0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: _buildStandardImage(banner),
+      ),
+    );
+  }
+
+  Widget _buildStandardImage(domain.Banner banner) {
+    return CachedNetworkImage(
+      imageUrl: banner.image,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center,
+      placeholder: (context, url) => ShimmerTemplate.banner(
+        height: double.infinity,
+        borderRadius: BorderRadius.zero,
+      ),
+      errorWidget: (context, url, error) => Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFF6B35), Color(0xFFFF8A50)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.image_not_supported,
+                color: Colors.white.withOpacity(0.7),
+                size: ResponsiveHelper.getIconSize(
+                  context: context,
+                  mobile: 40.0,
+                  tablet: 45.0,
+                  desktop: 50.0,
+                ),
+              ),
+              SizedBox(height: ResponsiveHelper.getHeight(
+                context: context,
+                mobile: 8.0,
+                tablet: 10.0,
+                desktop: 12.0,
+              )),
+              Text(
+                'Image not available',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: ResponsiveHelper.getFontSize(
+                    context: context,
+                    mobile: 12.0,
+                    tablet: 14.0,
+                    desktop: 16.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
