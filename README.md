@@ -317,9 +317,9 @@ class UIService {
 ## ⚠️ Error Handling
 
 <div align="center">
-  <img src="images/logging and error handling.png" alt="Logging and Error Handling" width="600"/>
+  <img src="images/logging and error handling.png" alt="Logging and Debugging" width="600"/>
   <br/>
-  <em>Logging and Error Handling Implementation</em>
+  <em>Logging and Debugging</em>
 </div>
 
 ### Comprehensive Error Handling Strategy
