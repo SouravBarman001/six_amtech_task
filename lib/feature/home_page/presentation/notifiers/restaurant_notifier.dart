@@ -5,7 +5,7 @@ import '../state/restaurant_state.dart';
 /// Notifier for managing restaurant state and operations
 class RestaurantNotifier extends StateNotifier<RestaurantState> {
   final GetRestaurantsUseCase _getRestaurantsUseCase;
-  static const int _defaultLimit = 10;
+  static const int _defaultLimit = 10; // Changed to 10 items per pagination
 
   RestaurantNotifier(this._getRestaurantsUseCase) : super(const RestaurantInitial());
 
@@ -16,18 +16,29 @@ class RestaurantNotifier extends StateNotifier<RestaurantState> {
     state = const RestaurantLoading();
     
     try {
+      print('🔄 Making initial API call - Offset: 0, Limit: $_defaultLimit');
+      
       final response = await _getRestaurantsUseCase.execute(
-        offset: 1, // API uses 1-based offset
+        offset: 0, // API uses 0-based offset
         limit: _defaultLimit,
       );
 
+      // Check if we have more data based on actual response
+      // If we got fewer restaurants than requested, we've reached the end
+      final hasMoreData = response.restaurants.length >= _defaultLimit;
+
+      print('✅ Loaded ${response.restaurants.length} restaurants');
+      print('📊 Total available: ${response.totalSize}');
+      print('📄 Has more: $hasMoreData (received ${response.restaurants.length}/$_defaultLimit)');
+
       state = RestaurantLoaded(
         restaurants: response.restaurants,
-        hasMoreData: response.hasMoreData,
+        hasMoreData: hasMoreData,
         totalSize: response.totalSize,
-        currentOffset: int.tryParse(response.offset) ?? 1,
+        currentOffset: _defaultLimit, // Next offset will be 10
       );
     } catch (e) {
+      print('❌ Error loading restaurants: $e');
       state = RestaurantError('Failed to load restaurants: ${e.toString()}');
     }
   }
@@ -42,7 +53,10 @@ class RestaurantNotifier extends StateNotifier<RestaurantState> {
     state = RestaurantLoadingMore(currentState.restaurants);
 
     try {
-      final nextOffset = currentState.currentOffset + _defaultLimit;
+      final nextOffset = currentState.currentOffset; // Use currentOffset directly as next offset
+      print('🔄 Loading more - Offset: $nextOffset, Limit: $_defaultLimit');
+      print('📊 Current loaded: ${currentState.restaurants.length}');
+      
       final response = await _getRestaurantsUseCase.execute(
         offset: nextOffset,
         limit: _defaultLimit,
@@ -54,13 +68,22 @@ class RestaurantNotifier extends StateNotifier<RestaurantState> {
         ...response.restaurants,
       ];
 
+      // Check if we have more data based on actual response
+      // If we got fewer restaurants than requested, we've reached the end
+      final hasMoreData = response.restaurants.length >= _defaultLimit;
+
+      print('✅ Loaded ${response.restaurants.length} more restaurants');
+      print('📊 Total loaded: ${allRestaurants.length}/${response.totalSize}');
+      print('📄 Has more: $hasMoreData (received ${response.restaurants.length}/$_defaultLimit)');
+
       state = RestaurantLoaded(
         restaurants: allRestaurants,
-        hasMoreData: response.hasMoreData,
+        hasMoreData: hasMoreData,
         totalSize: response.totalSize,
-        currentOffset: nextOffset,
+        currentOffset: nextOffset + _defaultLimit, // Next offset
       );
     } catch (e) {
+      print('❌ Error loading more restaurants: $e');
       // Revert to previous state on error
       state = currentState;
       // You might want to show a snackbar or toast here

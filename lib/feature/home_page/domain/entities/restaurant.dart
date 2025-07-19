@@ -68,9 +68,32 @@ class RestaurantResponse extends Equatable {
 
   /// Check if there are more restaurants to load
   bool get hasMoreData {
-    final currentOffset = int.tryParse(offset) ?? 0;
+    final currentOffset = int.tryParse(offset) ?? 1;
     final limitNum = int.tryParse(limit) ?? 10;
-    return (currentOffset + limitNum) < totalSize;
+    
+    // Method 1: Check if we got fewer restaurants than requested
+    final gotFewerThanRequested = restaurants.length < limitNum;
+    
+    // Method 2: Check if next offset would exceed total
+    // For 1-based: if current batch ends at or after totalSize, no more data
+    final currentBatchEnd = currentOffset + restaurants.length - 1;
+    final hasMoreByOffset = currentBatchEnd < totalSize;
+    
+    // Use the more reliable method: if we got fewer than requested, we're done
+    final result = !gotFewerThanRequested && hasMoreByOffset;
+    
+    // Debug logging
+    print('🔍 hasMoreData calculation:');
+    print('  - offset: $offset (parsed: $currentOffset)');
+    print('  - limit: $limit (parsed: $limitNum)');
+    print('  - totalSize: $totalSize');
+    print('  - restaurantsReceived: ${restaurants.length}');
+    print('  - gotFewerThanRequested: $gotFewerThanRequested');
+    print('  - currentBatchEnd: $currentBatchEnd');
+    print('  - hasMoreByOffset: $hasMoreByOffset');
+    print('  - final result: $result');
+    
+    return result;
   }
 
   /// Get next offset for pagination
