@@ -322,7 +322,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
       context: context,
       mobile: 90.0,
       tablet: 100.0,
-      desktop: 110.0,
+      desktop: 140.0,
     );
 
     return Container(
@@ -360,14 +360,14 @@ class _CategoryListState extends ConsumerState<CategoryList> {
       context: context,
       mobile: 70.0,
       tablet: 75.0,
-      desktop: 80.0,
+      desktop: 100.0,
     );
 
     final imageSize = ResponsiveHelper.getWidth(
       context: context,
       mobile: 62.0,
       tablet: 65.0,
-      desktop: 65.0,
+      desktop: 90.0,
     );
 
     final nameFontSize = ResponsiveHelper.getFontSize(
@@ -376,6 +376,9 @@ class _CategoryListState extends ConsumerState<CategoryList> {
       tablet: 12.0,
       desktop: 13.0,
     );
+
+    // Remove internal padding for all screen sizes to show full image
+    final containerPadding = EdgeInsets.zero;
 
     return GestureDetector(
       onTap: () {
@@ -392,12 +395,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
             Container(
               width: imageSize,
               height: imageSize,
-              padding: EdgeInsets.all(ResponsiveHelper.getPadding(
-                context: context,
-                mobile: 10.0,
-                tablet: 10.0,
-                desktop: 12.0,
-              )),
+              padding: containerPadding,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(borderRadius),
@@ -410,7 +408,7 @@ class _CategoryListState extends ConsumerState<CategoryList> {
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(borderRadius * 0.7),
+                borderRadius: BorderRadius.circular(borderRadius),
                 child: CachedNetworkImage(
                   imageUrl: category.image,
                   fit: BoxFit.cover,
