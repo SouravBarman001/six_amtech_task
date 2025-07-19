@@ -44,14 +44,14 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
       context: context,
       mobile: 150.0,
       tablet: 190.0,
-      desktop: 380.0,
+      desktop: 200.0,
     );
     
     final horizontalPadding = ResponsiveHelper.getPadding(
       context: context,
       mobile: 20.0,
       tablet: 28.0,
-      desktop: 36.0,
+      desktop: 24.0,
     );
     
     return Padding(
@@ -103,7 +103,11 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
 
     return PageView.builder(
       controller: _pageController,
-      itemCount: banners.length,
+      itemCount: ResponsiveHelper.isDesktop(context) 
+          ? (banners.length / 3).ceil() 
+          : ResponsiveHelper.isTablet(context)
+              ? (banners.length / 2).ceil()
+              : banners.length,
       onPageChanged: (index) {
         setState(() {
           _currentPage = index;
@@ -112,7 +116,16 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
         ref.read(bannerNotifierProvider.notifier).updateCurrentIndex(index);
       },
       itemBuilder: (context, index) {
-        return _buildBannerItem(banners[index]);
+        if (ResponsiveHelper.isDesktop(context)) {
+          // Desktop: Show 3 banners per page
+          return _buildDesktopBannerPage(banners, index);
+        } else if (ResponsiveHelper.isTablet(context)) {
+          // Tablet: Show 2 banners per page
+          return _buildTabletBannerPage(banners, index);
+        } else {
+          // Mobile: Show 1 banner per page
+          return _buildBannerItem(banners[index]);
+        }
       },
     );
   }
@@ -267,7 +280,80 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     );
   }
 
+  Widget _buildDesktopBannerPage(List<domain.Banner> banners, int pageIndex) {
+    final startIndex = pageIndex * 3;
+    final endIndex = (startIndex + 3).clamp(0, banners.length);
+    final pageBanners = banners.sublist(startIndex, endIndex);
+    
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.getPadding(
+          context: context,
+          mobile: 0.0,
+          tablet: 0.0,
+          desktop: 8.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < pageBanners.length; i++) ...[
+            Expanded(
+              child: _buildBannerItem(pageBanners[i]),
+            ),
+            if (i < pageBanners.length - 1)
+              SizedBox(width: ResponsiveHelper.getWidth(
+                context: context,
+                mobile: 0.0,
+                tablet: 0.0,
+                desktop: 12.0,
+              )),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabletBannerPage(List<domain.Banner> banners, int pageIndex) {
+    final startIndex = pageIndex * 2;
+    final endIndex = (startIndex + 2).clamp(0, banners.length);
+    final pageBanners = banners.sublist(startIndex, endIndex);
+    
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: ResponsiveHelper.getPadding(
+          context: context,
+          mobile: 0.0,
+          tablet: 6.0,
+          desktop: 0.0,
+        ),
+      ),
+      child: Row(
+        children: [
+          for (int i = 0; i < pageBanners.length; i++) ...[
+            Expanded(
+              child: _buildBannerItem(pageBanners[i]),
+            ),
+            if (i < pageBanners.length - 1)
+              SizedBox(width: ResponsiveHelper.getWidth(
+                context: context,
+                mobile: 0.0,
+                tablet: 12.0,
+                desktop: 0.0,
+              )),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildDotIndicator(int itemCount) {
+    // Calculate total pages based on screen type
+    final totalPages = ResponsiveHelper.isDesktop(context) 
+        ? (itemCount / 3).ceil() 
+        : ResponsiveHelper.isTablet(context)
+            ? (itemCount / 2).ceil()
+            : itemCount;
+        
     final dotMargin = ResponsiveHelper.getMargin(
       context: context,
       mobile: 4.0,
@@ -291,7 +377,7 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(itemCount, (index) {
+      children: List.generate(totalPages, (index) {
         bool isActive = _currentPage == index;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
@@ -326,7 +412,9 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
     );
     
     return Container(
-       padding: EdgeInsets.only(left:10,right: 10),
+      padding: ResponsiveHelper.isDesktop(context) 
+          ? EdgeInsets.zero 
+          : EdgeInsets.only(left: 10, right: 10),
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
@@ -342,6 +430,7 @@ class _PromotionalBannerState extends ConsumerState<PromotionalBanner> {
                 fit: ResponsiveHelper.isDesktop(context) ? BoxFit.cover : BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
+                alignment: Alignment.center,
                 placeholder: (context, url) => ShimmerTemplate.banner(
                   height: double.infinity,
                   borderRadius: BorderRadius.zero,
